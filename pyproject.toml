@@ -1,0 +1,25 @@
+[project]
+name = "audio-clock-sync"
+version = "0.1.0"
+description = "Recover clock offsets between recording devices from the ambient audio they both heard."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Jackie Oliver" }]
+dependencies = ["numpy>=1.24", "scipy>=1.10"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+clocksync = "clocksync.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["clocksync*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
