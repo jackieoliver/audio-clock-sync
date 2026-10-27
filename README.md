@@ -22,6 +22,25 @@ off.match.confident # snr >= 10, an empirical threshold from real device pairs
 - **Confidence is the peak divided by the standard deviation of the correlation away from the peak.** A real match is a spike over a flat floor; a spurious one is barely above it. Silence returns zero confidence rather than a made-up lag.
 - `rank_hypotheses()` tests several candidate offsets against a long reference by correlating only in a narrow window where each candidate predicts the probe should be. This is what makes the method precise — see below.
 
+The `clocksync` command runs that hypothesis path:
+
+```mermaid
+flowchart LR
+    A["Probe media file"] --> B["extract_audio: 16 kHz mono via ffmpeg"]
+    C[Candidate offsets] --> D["Expected probe position in reference, +/- search window"]
+    E[Reference WAV] --> F["wav_segment_reader: read only that slice"]
+    D --> F
+    B --> G["cross_correlate: normalize, fftconvolve"]
+    F --> G
+    G --> H["SNR: peak over noise floor away from peak"]
+    H --> I["rank_hypotheses: sort candidates by SNR"]
+    I --> J{"Top SNR >= 10?"}
+    J -->|Yes| K["Confident: refined offset in ms"]
+    J -->|No| L[No confident match]
+```
+
+Each candidate offset predicts where the probe clip should sit in the reference, and only that short slice is read and correlated. The candidate whose slice gives a sharp peak wins, and the peak's position gives its refined offset.
+
 ## The finding it was built for
 
 Over roughly three weeks of multi-device field recordings, a consumer camera's clock was compared against a dedicated audio recorder. The result was not a single drift value:
